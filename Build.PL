@@ -16,7 +16,12 @@ my $builder = Module::Build->new(
     },
     requires => {
         'perl' => '5.008001',
-        'Carp' => 0,
+        'strict' => 0,
+        'warnings' => 0,
+        'utf8' => 0,
+        'Encode' => 0,
+        'File::Slurp' => 0,
+        'Class::Accessor::Lite' => 0,
     },
     add_to_cleanup      => [ 'Acme-EverythingBecomes-*' ],
     meta_merge     => {
