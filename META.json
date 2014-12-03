@@ -26,8 +26,13 @@
       },
       "runtime" : {
          "requires" : {
-            "Carp" : "0",
-            "perl" : "5.008001"
+            "Class::Accessor::Lite" : "0",
+            "Encode" : "0",
+            "File::Slurp" : "0",
+            "perl" : "5.008001",
+            "strict" : "0",
+            "utf8" : "0",
+            "warnings" : "0"
          }
       }
    },

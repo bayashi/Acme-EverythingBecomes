@@ -16,7 +16,7 @@ sub F {
     my %args  = @_;
 
     bless {
-        chars      => $args{chars} || ['f', 'F'],
+        chars      => $args{chars},
         split_line => $args{split_line} || "\n",
         _encode_cache => {},
         _decode_cache => {},
@@ -32,7 +32,7 @@ sub encode {
         for my $word (split //, $line) {
             push @words, $self->_encode_word($word);
         }
-        push @encoded_lines, join(' ', @words);
+        push @encoded_lines, join("\t", @words);
     }
     join $self->{split_line}, @encoded_lines;
 }
@@ -47,9 +47,16 @@ sub _encode_word {
     my $encoded = sprintf "%b", ord $word;
     $encoded =~ s/^0+//g;
     $encoded = '0' if $encoded eq '';
-    $encoded =~ s/0/$self->chars->[0]/eg;
-    $encoded =~ s/1/$self->chars->[1]/eg;
-    $self->{_encode_cache}{$word} = $encoded;
+
+    if ($self->chars) {
+        $encoded =~ s/0/$self->chars->[0]/eg;
+        $encoded =~ s/1/$self->chars->[1]/eg;
+        $self->{_encode_cache}{$word} = $encoded;
+    }
+    else {
+        $encoded =~ s!0!F !g;
+        $encoded =~ s!1!FF!g;
+    }
     return $encoded;
 }
 
@@ -59,7 +66,7 @@ sub decode {
     my @decoded_lines;
     for my $line (split /$self->{split_line}/, $str) {
         my @words;
-        for my $word (split / /, $line) {
+        for my $word (split /\t/, $line) {
             push @words, $self->_decode_word($word);
         }
         push @decoded_lines, join('', @words);
@@ -74,7 +81,13 @@ sub _decode_word {
         return $self->{_decode_cache}{$word};
     }
 
-    my ($zero, $one) = @{$self->chars};
+    my ($zero, $one);
+    if ($self->chars) {
+        ($zero, $one) = @{$self->chars};
+    }
+    else {
+        ($zero, $one) = ('F ', 'FF');
+    }
     my $decoded = $word;
     $decoded =~ s/$zero/0/eg;
     $decoded =~ s/$one/1/eg;
@@ -112,8 +125,8 @@ Acme::EverythingBecomes - Everything becomes F
     use Acme::EverythingBecomes;
 
     my $f = Acme::EverythingBecomes->F;
-    print $f->encode('print 1;');
-    # FFFffff FFFffFf FFfFffF FFfFFFf FFFfFff Ffffff FFfffF FFFfFF
+    print $f->encode('say 1;');
+    # FFFFFFF F FFFF  FFFFF F F F FF  FFFFFFFFF F FF  FFF F F F F     FFFFF F F FF   FFFFFFF FFFF
 
 
 =head1 DESCRIPTION
